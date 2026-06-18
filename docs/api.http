@@ -1,0 +1,96 @@
+### Movie Watchlist API — HTTP client requests
+@base_url = http://127.0.0.1:8000
+
+### Register (saves token)
+POST {{base_url}}/api/register
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Nikola",
+  "email": "nikola@gmail.com",
+  "password": "sifra1234!",
+  "password_confirmation": "sifra1234!"
+}
+
+> {% client.global.set("token", response.body.token); %}
+
+### Login (saves token)
+POST {{base_url}}/api/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "nikola@gmail.com",
+  "password": "sifra1234!"
+}
+
+> {% client.global.set("token", response.body.token); %}
+
+### Current authenticated user
+GET {{base_url}}/api/user
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Add a movie by IMDb id (saves the new item id)
+POST {{base_url}}/api/watchlist
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "imdb_id": "tt0133093",
+  "status": "to_watch",
+  "priority": "high",
+  "notes": "Recommended by a friend."
+}
+
+> {% client.global.set("item_id", response.body.data.id); %}
+
+### Add a movie by title (+ optional year to disambiguate)
+POST {{base_url}}/api/watchlist
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Inception",
+  "year": 2010,
+  "status": "watching"
+}
+
+### List the whole watchlist
+GET {{base_url}}/api/watchlist
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### List with filtering, sorting and pagination
+GET {{base_url}}/api/watchlist?status=to_watch&sort=created_at&direction=desc&per_page=10
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### View a single item
+GET {{base_url}}/api/watchlist/{{item_id}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Update an item (status -> watched also stamps watched_at)
+PATCH {{base_url}}/api/watchlist/{{item_id}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "watched",
+  "rating": 9
+}
+
+### Remove an item
+DELETE {{base_url}}/api/watchlist/{{item_id}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Log out (revokes the current token)
+POST {{base_url}}/api/logout
+Accept: application/json
+Authorization: Bearer {{token}}

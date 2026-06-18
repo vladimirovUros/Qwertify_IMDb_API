@@ -1,0 +1,194 @@
+{
+  "info": {
+    "name": "Qwertify IMDb watchlist API",
+    "description": "Personal movie watchlist API.\n\nThe `base_url` collection variable defaults to http://127.0.0.1:8000. Run Register or Login first - both automatically save the returned token into the `token` variable, so every protected request below is authorized for you. Add movie (by IMDb id) also saves the new item id into `item_id`, used by the view/update/delete requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "token", "value": "" },
+    { "key": "item_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('token', pm.response.json().token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nikola\",\n  \"email\": \"nikola@gmail.com\",\n  \"password\": \"sifra1234!\",\n  \"password_confirmation\": \"sifra1234!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/register", "host": ["{{base_url}}"], "path": ["api", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set('token', pm.response.json().token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nikola@gmail.com\",\n  \"password\": \"sifra1234!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/login", "host": ["{{base_url}}"], "path": ["api", "login"] }
+          }
+        },
+        {
+          "name": "Current user",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/user", "host": ["{{base_url}}"], "path": ["api", "user"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/logout", "host": ["{{base_url}}"], "path": ["api", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Watchlist",
+      "item": [
+        {
+          "name": "Add movie (by IMDb id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('item_id', pm.response.json().data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imdb_id\": \"tt0133093\",\n  \"status\": \"to_watch\",\n  \"priority\": \"high\",\n  \"notes\": \"Recommended by a friend.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/watchlist", "host": ["{{base_url}}"], "path": ["api", "watchlist"] }
+          }
+        },
+        {
+          "name": "Add movie (by title)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Inception\",\n  \"year\": 2010,\n  \"status\": \"watching\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/watchlist", "host": ["{{base_url}}"], "path": ["api", "watchlist"] }
+          }
+        },
+        {
+          "name": "List (all)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/watchlist", "host": ["{{base_url}}"], "path": ["api", "watchlist"] }
+          }
+        },
+        {
+          "name": "List (filtered & sorted)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/watchlist?status=to_watch&sort=created_at&direction=desc&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "watchlist"],
+              "query": [
+                { "key": "status", "value": "to_watch" },
+                { "key": "priority", "value": "high", "disabled": true },
+                { "key": "search", "value": "matrix", "disabled": true },
+                { "key": "sort", "value": "created_at" },
+                { "key": "direction", "value": "desc" },
+                { "key": "per_page", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "View one",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/watchlist/{{item_id}}", "host": ["{{base_url}}"], "path": ["api", "watchlist", "{{item_id}}"] }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"watched\",\n  \"rating\": 9\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/watchlist/{{item_id}}", "host": ["{{base_url}}"], "path": ["api", "watchlist", "{{item_id}}"] }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/watchlist/{{item_id}}", "host": ["{{base_url}}"], "path": ["api", "watchlist", "{{item_id}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}
